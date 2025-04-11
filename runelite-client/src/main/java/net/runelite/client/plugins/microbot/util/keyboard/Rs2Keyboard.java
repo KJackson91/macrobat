@@ -113,9 +113,8 @@ public class Rs2Keyboard {
             Microbot.getClient().getCanvas().setFocusable(!originalFocusValue);
         }
 
-        final int randomizer = random(20, 200);
 
-        KeyEvent keyEvent = new KeyEvent(getCanvas(), KeyEvent.KEY_RELEASED, System.currentTimeMillis() + randomizer, 0, key);
+        KeyEvent keyEvent = new KeyEvent(getCanvas(), KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, key);
 
         getCanvas().dispatchEvent(keyEvent);
 

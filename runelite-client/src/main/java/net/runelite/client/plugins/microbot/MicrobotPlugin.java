@@ -217,7 +217,6 @@ public class MicrobotPlugin extends Plugin {
         Microbot.getPouchScript().onMenuOptionClicked(event);
         Rs2Gembag.onMenuOptionClicked(event);
         Microbot.targetMenu = null;
-        System.out.println(event.getMenuEntry());
     }
 
     @Subscribe

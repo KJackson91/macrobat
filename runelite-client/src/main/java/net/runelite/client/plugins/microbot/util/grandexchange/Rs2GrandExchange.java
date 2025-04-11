@@ -176,7 +176,7 @@ public class Rs2GrandExchange {
         return false;
     }
 
-    private static void confirm() {
+    public static void confirm() {
         Microbot.getMouse().click(getConfirm().getBounds());
         sleepUntil(() -> Rs2Widget.hasWidget("Your offer is much higher"), 2000);
         if (Rs2Widget.hasWidget("Your offer is much higher")) {
@@ -184,7 +184,7 @@ public class Rs2GrandExchange {
         }
     }
 
-    private static void setQuantity(int quantity) {
+    public static void setQuantity(int quantity) {
         if (quantity > 1) {
             Widget quantityButtonX = getQuantityButton_X();
             Microbot.getMouse().click(quantityButtonX.getBounds());
@@ -320,7 +320,7 @@ public class Rs2GrandExchange {
         }
     }
 
-    private static boolean useGrandExchange() {
+    public static boolean useGrandExchange() {
         if (!isOpen()) {
             boolean hasExchangeOpen = openExchange();
             if (!hasExchangeOpen) {
