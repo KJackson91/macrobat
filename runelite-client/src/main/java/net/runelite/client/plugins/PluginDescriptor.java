@@ -33,6 +33,7 @@ import java.lang.annotation.*;
 public @interface PluginDescriptor
 {
     String DrDeath = "<html>[<font color=#FF0000>DD</font>]";
+	String Elaida = "<html>[<font color=#808080>FOOSH</font>]";
     String Bee = "<html>[<font color=#FFD700><b>B</b></font>] ";
     String Nate = "<html>[<font color=orange>N</font>] ";
     String Mocrosoft = "<html>[<font color=#b8f704M>M</font>] ";

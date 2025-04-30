@@ -25,6 +25,7 @@ public abstract class Mouse {
             try {
                 points.removeFirst();
             } catch (Exception ignore) {
+                System.out.println("Ignored exception: " + ignore.getMessage());
             }
 
         }

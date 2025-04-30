@@ -130,6 +130,15 @@ public class GameActionsDeserializer {
         }
     }
 
+    // Gmaul spec
+
+    public static class GmaulSpecialAttackAction extends Action {
+        public GmaulSpecialAttackAction() { super("gmaul_special"); }
+
+        @Override
+        public String toString() { return "GmaulSpecialAttackAction{}"; }
+    }
+
     // Prayer Action
     public static class PrayerAction extends Action {
         private final String prayer;
@@ -172,6 +181,9 @@ public class GameActionsDeserializer {
 
                 case "special":
                     return new SpecialAttackAction();
+
+                case "gmaul_special":
+                    return new GmaulSpecialAttackAction();
 
                 case "prayer":
                     String prayer = jsonObject.get("prayer").getAsString();

@@ -2,6 +2,7 @@ package net.runelite.client.plugins.microbot.fooshapvp;
 
 import com.google.gson.Gson;
 import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.MenuAction;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
@@ -11,13 +12,16 @@ import net.runelite.client.plugins.microbot.fooshapvp.data.GameActionsDeserializ
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2PrayerEnum;
+import net.runelite.client.plugins.microbot.util.reflection.Rs2Reflection;
 import net.runelite.client.plugins.microbot.util.tabs.Rs2Tab;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
+import java.awt.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -30,7 +34,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 public class FooshaPVPScript extends Script {
-    private final List<String> equipOptions = new ArrayList<>(Arrays.asList("Wear", "Wield", "Equip"));
+        private final List<String> equipOptions = new ArrayList<>(Arrays.asList("Wear", "Wield", "Equip"));
     private static final URI endpoint = URI.create("http://192.168.1.193:5010/combat");
     private int loop_delay = 20;
     private Gson gson;
@@ -39,6 +43,10 @@ public class FooshaPVPScript extends Script {
     private int lastActionGameCycle = 0;
 
     private ConcurrentLinkedQueue<GameActionsDeserializer.Action> actionQueue = new ConcurrentLinkedQueue<>();
+
+    public void clearActionQueue(){
+        actionQueue.clear();
+    }
 
     private void init(FooshaPVPConfig config) {
         gson = new Gson();
@@ -128,11 +136,12 @@ public class FooshaPVPScript extends Script {
     public boolean run(FooshaPVPConfig config) {
         init(config);
         mainScheduledFuture = scheduledExecutorService.scheduleAtFixedRate(() -> {
-            if (Microbot.getClient().getGameCycle() == lastActionGameCycle) return;
+            if (Microbot.getClient().getGameCycle() <= lastActionGameCycle) return;
             lastActionGameCycle = Microbot.getClient().getGameCycle();
             var clientTickAction = actionQueue.poll();
             if (clientTickAction != null) {
                 // Do the action
+                var startClientTick = Microbot.getClient().getGameCycle();
                 System.out.println("Client tick: " + Microbot.getClient().getGameCycle() + "\n Action type: " + clientTickAction.getType() + "\n Client thread: " + Microbot.getClient().isClientThread());
 
                 if (Objects.equals(clientTickAction.getType(), "move")) {
@@ -160,8 +169,8 @@ public class FooshaPVPScript extends Script {
                         }
                     } else {
 
-                        Rs2Inventory.interact(Rs2Inventory.getItemInSlot(a.getSlotIndex()), a.getActionType());
-
+                        var result = Rs2Inventory.interact(Rs2Inventory.getItemInSlot(a.getSlotIndex()), a.getActionType());
+                        System.out.println(result);
                     }
 
                 } else if (Objects.equals(clientTickAction.getType(), "attack")) {
@@ -169,12 +178,22 @@ public class FooshaPVPScript extends Script {
 
                     Rs2Player.attack(Rs2Player.getPlayer(a.getTarget()));
 
-                } else if (Objects.equals(clientTickAction.getType(), "special")) {
-
-                    //10485795
+                }
+                else if (Objects.equals(clientTickAction.getType(), "gmaul_special")) {
 
                     Microbot.getMouse().click(Rs2Widget.getWidget(10485795).getBounds());
+                    Microbot.getMouse().click(Rs2Widget.getWidget(10485795).getBounds());
+                    Microbot.getMouse().click(Rs2Widget.getWidget(10485795).getBounds());
 
+                }
+
+                else if (Objects.equals(clientTickAction.getType(), "special")) {
+
+                    //10485795
+                    //Rs2Reflection.invokeMenu(-1, 10485795, MenuAction.CC_OP.getId(), 1, -1, "Use", "Special Attack", -1, -1);
+                    Microbot.getMouse().click(Rs2Widget.getWidget(10485795).getBounds());
+                    lastActionGameCycle = startClientTick + 2;
+                    //Microbot.doInvoke(new NewMenuEntry(-1, 10485795, MenuAction.CC_OP.getId(), 1, -1, "Special Attack"), new Rectangle(1, 1, Microbot.getClient().getCanvasWidth(), Microbot.getClient().getCanvasHeight()));
 
                 } else if (Objects.equals(clientTickAction.getType(), "prayer")) {
                     var a = (GameActionsDeserializer.PrayerAction) clientTickAction;

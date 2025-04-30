@@ -25,6 +25,7 @@ import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
 import net.runelite.client.plugins.microbot.util.prayer.Rs2PrayerEnum;
+import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -88,8 +90,10 @@ public class FooshaPVPPlugin extends Plugin {
     private HttpClient client;
     private boolean shouldCheckRecoil = false;
     private boolean shouldStartSession = false;
+    private boolean stop = false;
     private boolean sessionRunning = false;
     private int recoilRemaining = 0;
+    private final List<String> equipOptions = new ArrayList<>(Arrays.asList("Wear", "Wield", "Equip"));
     private static final String MENU_OPTION = "<col=FF0000>MARK FOR DEATH";
 
     private ScheduledExecutorService exec = Executors.newScheduledThreadPool(10);
@@ -102,7 +106,7 @@ public class FooshaPVPPlugin extends Plugin {
 //        }
         fooshPVPScript.run(config);
         gson = new Gson();
-
+        stop = false;
         client = HttpClient.newHttpClient();
 
         menuManager.addPlayerMenuItem(MENU_OPTION);
@@ -116,6 +120,7 @@ public class FooshaPVPPlugin extends Plugin {
     }
 
     protected void shutDown() {
+        fooshPVPScript.clearActionQueue();
         fooshPVPScript.shutdown();
         //overlayManager.remove(fooshaPVPOverlay);
         menuManager.removePlayerMenuItem(MENU_OPTION);
@@ -161,6 +166,15 @@ public class FooshaPVPPlugin extends Plugin {
             //System.out.println("Exp drop detected, current drops: " + experienceDrops);
         }
 
+    }
+
+    private String findMatchingEquipOption(String[] actions) {
+        for (String action : actions) {
+            if (equipOptions.contains(action)) {
+                return action; // Return the first matching value
+            }
+        }
+        return null; // Return null if no match is found
     }
 
     @Subscribe(priority = 0)
@@ -449,11 +463,6 @@ public class FooshaPVPPlugin extends Plugin {
         } catch (Exception e) {
             System.out.println("Something went wrong in the projectile handler: " + e.getMessage());
         }
-
-    }
-
-    @Subscribe
-    public void onMenuEntryAdded(MenuEntryAdded event) {
 
     }
 
